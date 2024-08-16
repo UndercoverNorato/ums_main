@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -17,21 +19,23 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private JwtUtil jwtUtil;
-
     @PostMapping("/register")
-    public ResponseEntity<User> registerUser(@RequestBody User user) {
+    public ResponseEntity<User> register(@RequestBody User user) {
         return ResponseEntity.ok(userService.registerUser(user));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> loginUser(@RequestBody User user) {
-        ResponseEntity<String> loginResponse = userService.loginUser(user);
-        if (loginResponse.getStatusCode().is2xxSuccessful()) {
-            String token = jwtUtil.generateToken(user.getUsername());
-            return ResponseEntity.ok("Bearer " + token);
-        }
-        return loginResponse;
+    public ResponseEntity<User> login(@RequestBody Map<String, String> credentials) {
+        String username = credentials.get("username");
+        String password = credentials.get("password");
+        return ResponseEntity.ok(userService.loginUser(username, password));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Void> resetPassword(@RequestBody Map<String, String> resetDetails) {
+        String email = resetDetails.get("email");
+        String newPassword = resetDetails.get("newPassword");
+        userService.resetPassword(email, newPassword);
+        return ResponseEntity.ok().build();
     }
 }

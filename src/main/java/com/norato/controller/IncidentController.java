@@ -19,17 +19,7 @@ public class IncidentController {
     private IncidentService incidentService;
 
     @PostMapping("/create")
-    public ResponseEntity<Incident> createIncident(@RequestBody Incident incident) {
-        return ResponseEntity.ok(incidentService.createIncident(incident));
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<Incident> getIncidentById(@PathVariable Long id) {
-        return ResponseEntity.ok(incidentService.getIncidentById(id));
-    }
-
-    @GetMapping
-    public ResponseEntity<List<Incident>> getAllIncidents() {
-        return ResponseEntity.ok(incidentService.getAllIncidents());
+    public ResponseEntity<Incident> createIncident(@RequestBody Incident incident, @RequestParam String username) {
+        return ResponseEntity.ok(incidentService.createIncident(incident, username));
     }
 }

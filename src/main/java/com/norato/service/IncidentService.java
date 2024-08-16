@@ -3,8 +3,11 @@ package com.norato.service;
 
 
 import com.norato.model.Incident;
+import com.norato.model.User;
 import com.norato.repo.IncidentRepository;
+import com.norato.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -16,24 +19,21 @@ public class IncidentService {
 
     @Autowired
     private IncidentRepository incidentRepository;
+    @Autowired
+    private UserRepository userRepository;
 
-    public Incident createIncident(Incident incident) {
-        incident.setIncidentId(generateIncidentId());
-        incident.setReportedDateTime(LocalDateTime.now());
+    public Incident createIncident(Incident incident, String username) {
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        incident.setUser(user);
+        incident.setIncidentId(generateUniqueIncidentId());
         return incidentRepository.save(incident);
     }
 
-    public Incident getIncidentById(Long id) {
-        return incidentRepository.findById(id).orElse(null);
-    }
-
-    public List<Incident> getAllIncidents() {
-        return incidentRepository.findAll();
-    }
-
-    private String generateIncidentId() {
-        Random random = new Random();
-        int randomNumber = 10000 + random.nextInt(90000);
-        return "RMG" + randomNumber + LocalDateTime.now().getYear();
+    private String generateUniqueIncidentId() {
+        String incidentId;
+        do {
+            incidentId = "RMG" + new Random().nextInt(100000) + "2022";
+        } while (incidentRepository.findByIncidentId(incidentId).isPresent());
+        return incidentId;
     }
 }
